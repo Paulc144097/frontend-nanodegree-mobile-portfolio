@@ -421,8 +421,6 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-
-
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
     switch(size){
@@ -439,9 +437,12 @@ var resizePizzas = function(size) {
         console.log("bug in sizeSwitcher");
     }
 
+//Created var randomPizzas and placing outside of loop to prevent FSL
     var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
 
     for (var i = 0; i < randomPizzas.length; i++) {
+      //var dx = determineDX(randomPizzas[i], size);
+      //var newWidth = (randomPizzas[i].offsetWidth +dx) + 'px';
       randomPizzas[i].style.width = newWidth;
     }
   }
@@ -487,26 +488,38 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // Moves the sliding background pizzas based on scroll position
-//NEEEEEEEEEEEED WWOOOOOOOORK FSL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
   var items = document.querySelectorAll('.mover');
+
+//fixed FSL by moving scrollTop outside of the loop, otherwise it will run layour every loop
+  var docScrollTop = (document.body.scrollTop)/1250;
+
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    var phase = Math.sin((docScrollTop) + (i % 5));
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
+
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
   window.performance.mark("mark_end_frame");
   window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
+
+  //moved var timesToUpdatePosition outside of the loop so it doesnt make a variable every sing time
+  var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
   if (frame % 10 === 0) {
-    var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
+    
     logAverageFrame(timesToUpdatePosition);
   }
 }
+
+
+
+
 
 // runs updatePositions on scroll
 window.addEventListener('scroll', updatePositions);
